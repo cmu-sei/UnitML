@@ -24,7 +24,7 @@ function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
         })
         .catch(reason => {
           console.error(
-            `The model_test server extension appears to be missing.\n${reason}`
+            `The model_test server extension ran into an error.\n${reason}`
           );
         });
     }

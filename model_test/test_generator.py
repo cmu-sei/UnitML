@@ -1,5 +1,6 @@
-import json
-import glob
+import json, glob
+
+from model_test.boundary_test_generator import *
 
 def generate_test_file():
     # Importing the descriptors
@@ -13,65 +14,110 @@ def generate_test_file():
 
     test_file = open("test_generated.py", "w")
 
-    # Declare any inputs/outputs with or without descriptor data
-    # test_file.write("# Set input params\n")
-    # test_file.write("max_input = " + str(dp_json["version"]) + "\n")
-    # test_file.write("min_input = " + str(tm_json["version"]) + "\n\n")
-
     # Initial setup at the beginning of the file
-    test_file.write("# Import any required modules\n")
+    test_file.write("import pytest\n\n")
+    test_file.write("# USER INPUT: Import any modules required for your data pipeline or model\n")
     test_file.write("# ex: import tensorflow as tf\n\n")
 
-    test_file.write("# Import your data pipeline and model\n")
-    test_file.write("# ex: \n\n")
+    test_file.write("# USER INPUT: If needed, import your data pipeline and model\n")
+    test_file.write("# ex: import my_model_file as model\n\n")
 
-    test_file.write("# Define a class for an input into your data pipeline")
+    # Defining the DataPipelineInput class
+    test_file.write("# Defining a class that represents an input into the data pipeline\n")
+    test_file.write("class DataPipelineInput:\n")
+    test_file.write(f"\tdef __init__(self):\n")
+    for item in dp_json["input_spec"]:
+        index = dp_json["input_spec"].index(item)
+        test_file.write(f"\t\t# Field that relates to the {item['item_name']} item\n")
+        test_file.write(f"\t\t# USER INPUT: Define a default value for this item to be used for tests\n")
+        test_file.write(f"\t\tself.input{index} = None\n\n")
 
-    test_file.write("# Define a class for your data pipeline here\n")
+    # Defining the DataPipeline class
+    test_file.write("# Defining a class for your data pipeline here\n")
     test_file.write("class DataPipeline:\n")
+    test_file.write("\t# USER INPUT: Define any setup that is needed to instantiate your data pipeline\n")
     test_file.write("\tdef __init__(self):\n")
     test_file.write("\t\tpass\n\n")
-    test_file.write("\tdef run(self, input):\n")
+    test_file.write("\t# USER INPUT: Define how to run your data pipeline. The run method accepts an instance of the\n")
+    test_file.write("\t# DataPipelineInput class and it should return an object that is ready to be passed to the model\n")
+    test_file.write("\tdef run(self, input: DataPipelineInput):\n")
     test_file.write("\t\treturn input\n\n")
 
+    # Defining the model class
     test_file.write("# Define your model here\n")
     test_file.write("class Model:\n")
+    test_file.write("\t# USER INPUT: Define how to load your model\n")
+    test_file.write("\t# ex: self.model = pickle.load(open('model.sav', 'rb'))\n")
     test_file.write("\tdef __init__(self):\n")
-    test_file.write("\t\t# Define how to load your model\n")
-    test_file.write("\t\t# ex: self.model = tf.keras.models.load_model(\"my_model_directory\")\n")
     test_file.write("\t\tself.model = \n\n")
+    test_file.write("\t# USER INPUT: Define how to run your model. The input parameter will be the direct output from DataPipeline.run\n")
+    test_file.write("\t# ex: return self.model.predict(input)\n")
     test_file.write("\tdef run(self, input):\n")
     test_file.write("\t\treturn input\n\n")
 
-    test_file.write("# Initialize an instance of your data pipeline\n")
-    test_file.write("test_data_pipeline = DataPipeline()\n\n")
+    test_file.write("# Initializing an instance of the data pipeline to be used for tests\n")
+    test_file.write("data_pipeline_instance = DataPipeline()\n\n")
 
-    test_file.write("# Initialize an instance of your model\n")
-    test_file.write("test_model = Model()\n\n\n")
+    test_file.write("# Initializing an instance of the model to be used for tests\n")
+    test_file.write("model_instance = Model()\n\n\n")
 
-    # Generate and add boundary tests to the file
+    # Expected output for assertions based on trained model output/final output spec
+    spec = {}
+    if tm_json['post_processing']:
+        spec = tm_json['final_output_spec']
+    else:
+        spec = tm_json['output_spec']
+
+    assert_string = generate_assert_string(spec)
+        
+    # Generate boundary tests
+    param_list = ""
+    for item in dp_json["input_spec"]:
+        index = dp_json["input_spec"].index(item)
+        param_list += f"test_input.input{index}"
+
+        if index < len(dp_json["input_spec"]) - 1:
+            param_list += ", "
+    
+    input_string = f"np.array([{param_list}])"
+
+    test_file.write("# Boundary tests for each data item defined in the data pipeline input specification\n")
     test_file.write("class TestBoundaries:\n")
-    for item in dp_json['input_spec']:
-        if item['item_type'] == "Integer":
-            generate_integer_boundary_tests(test_file, item, dp_json['input_spec'].index(item))
-
+    for item in dp_json["input_spec"]:
+        if item["item_type"] == "Integer":
+            generate_integer_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, assert_string)
+        elif item["item_type"] == "Float":
+            generate_float_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, assert_string)
+        elif item["item_type"] == "String":
+            generate_string_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, assert_string)
+        elif item["item_type"] == "Image":
+            generate_image_boundary_tests()
+        
     test_file.close()
 
     return "Tests created."
 
-def generate_integer_boundary_tests(test_file, item, item_index):
-    test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
-    test_file.write(f"\tdef test_boundary_{item_index}_{0}(self):\n")
-    test_file.write(f"\t\tdata_pipeline_input = [{item['min_value'] - 1}, ..., ...]\n")
-    test_file.write(f"\t\tdata_pipeline_output = test_data_pipeline.run(data_pipeline_input)\n")
-    test_file.write(f"\t\tassert test_model.run(data_pipeline_output) == {item_index}\n\n")
 
-    test_file.write(f"\tdef test_boundary_{item_index}_{1}(self):\n")
-    test_file.write(f"\t\tdata_pipeline_input = [{item['min_value']}, ..., ...]\n")
-    test_file.write(f"\t\tdata_pipeline_output = test_data_pipeline.run(data_pipeline_input)\n")
-    test_file.write(f"\t\tassert test_model.run(data_pipeline_output) == {item_index}\n\n")
+def generate_assert_string(spec) -> str:
+    assert_string = "assert (\n\t\t\t"
 
-    test_file.write(f"\tdef test_boundary_{item_index}_{0}(self):\n")
-    test_file.write(f"\t\tdata_pipeline_input = [{item['min_value'] + 1}, ..., ...]\n")
-    test_file.write(f"\t\tdata_pipeline_output = test_data_pipeline.run(data_pipeline_input)\n")
-    test_file.write(f"\t\tassert test_model.run(data_pipeline_output) == {item_index}\n\n")
+    for item in spec:
+        index = spec.index(item)
+
+        if item["item_type"] in ["Integer", "Float"]:
+            assert_string += f"(model_output[{index}] >= {item['min_value']} and model_output[{index}] <= {item['max_value']})"
+        elif item["item_type"] == "String":
+            assert_string += f"(len(model_output[{index}]) >= {item['min_length']} and len(model_output[{index}]) <= {item['max_length']})"
+        elif item["item_type"] == "Image":
+            pass
+        elif ["item_type"] == "Text":
+            pass
+        elif ["item_type"] == "Character":
+            pass
+
+        if index < len(spec) - 1:
+            assert_string += "\n\t\t\tand "
+        else:
+            assert_string += "\n\t\t)"
+
+    return assert_string
