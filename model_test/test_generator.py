@@ -1,6 +1,7 @@
 import json, glob
 
 from model_test.boundary_test_generator import *
+from model_test.equivalence_test_generator import *
 
 def generate_test_file():
     # Importing the descriptors
@@ -15,7 +16,9 @@ def generate_test_file():
     test_file = open("test_generated.py", "w")
 
     # Initial setup at the beginning of the file
+    test_file.write("import numpy as np\n")
     test_file.write("import pytest\n\n")
+    test_file.write("from PIL import Image\n\n")
     test_file.write("# USER INPUT: Import any modules required for your data pipeline or model\n")
     test_file.write("# ex: import tensorflow as tf\n\n")
 
@@ -68,7 +71,8 @@ def generate_test_file():
     else:
         spec = tm_json['output_spec']
 
-    assert_string = generate_assert_string(spec)
+    success_assert_string = generate_success_assert_string(spec)
+    failure_assert_string = generate_failure_assert_string(spec)
         
     # Generate boundary tests
     param_list = ""
@@ -85,21 +89,34 @@ def generate_test_file():
     test_file.write("class TestBoundaries:\n")
     for item in dp_json["input_spec"]:
         if item["item_type"] == "Integer":
-            generate_integer_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, assert_string)
+            generate_integer_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)
         elif item["item_type"] == "Float":
-            generate_float_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, assert_string)
+            generate_float_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)
         elif item["item_type"] == "String":
-            generate_string_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, assert_string)
+            generate_string_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)
         elif item["item_type"] == "Image":
-            generate_image_boundary_tests()
+            generate_image_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)
         
+
+    test_file.write("# Equivalence class tests for each data item defined in the data pipeline input specification\n")
+    test_file.write("class TestEquivalenceClass:\n")
+    for item in dp_json["input_spec"]:
+        if item["item_type"] == "Integer":
+            generate_integer_equivalence_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)
+        elif item["item_type"] == "Float":
+            pass
+        elif item["item_type"] == "String":
+            generate_string_equivalence_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)            
+        elif item["item_type"] == "Image":
+            pass
+
     test_file.close()
 
     return "Tests created."
 
 
-def generate_assert_string(spec) -> str:
-    assert_string = "assert (\n\t\t\t"
+def generate_success_assert_string(spec) -> str:
+    assert_string = "\t\tassert (\n\t\t\t"
 
     for item in spec:
         index = spec.index(item)
@@ -109,15 +126,18 @@ def generate_assert_string(spec) -> str:
         elif item["item_type"] == "String":
             assert_string += f"(len(model_output[{index}]) >= {item['min_length']} and len(model_output[{index}]) <= {item['max_length']})"
         elif item["item_type"] == "Image":
-            pass
-        elif ["item_type"] == "Text":
-            pass
-        elif ["item_type"] == "Character":
-            pass
+            assert_string += f"(model_output[{index}].size[0] == {item['resolution_x']} and model_output[{index}].size[1] == {item['resolution_y']})"
 
         if index < len(spec) - 1:
             assert_string += "\n\t\t\tand "
         else:
-            assert_string += "\n\t\t)"
+            assert_string += "\n\t\t)\n\n"
+
+    return assert_string
+
+
+def generate_failure_assert_string(spec) -> str:
+    assert_string = ("\t\t# USER INPUT: Define failure case\n"
+                    "\t\tassert False\n\n")
 
     return assert_string
