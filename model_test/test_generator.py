@@ -65,14 +65,14 @@ def generate_test_file():
     test_file.write("model_instance = Model()\n\n\n")
 
     # Expected output for assertions based on trained model output/final output spec
-    spec = {}
+    output_spec = {}
     if tm_json['post_processing']:
-        spec = tm_json['final_output_spec']
+        output_spec = tm_json['final_output_spec']
     else:
-        spec = tm_json['output_spec']
+        output_spec = tm_json['output_spec']
 
-    success_assert_string = generate_success_assert_string(spec)
-    failure_assert_string = generate_failure_assert_string(spec)
+    success_assert_string = generate_success_assert_string(output_spec)
+    failure_assert_string = generate_failure_assert_string(output_spec)
         
     # Generate boundary tests
     param_list = ""
@@ -115,11 +115,11 @@ def generate_test_file():
     return "Tests created."
 
 
-def generate_success_assert_string(spec) -> str:
+def generate_success_assert_string(output_spec) -> str:
     assert_string = "\t\tassert (\n\t\t\t"
 
-    for item in spec:
-        index = spec.index(item)
+    for item in output_spec:
+        index = output_spec.index(item)
 
         if item["item_type"] in ["Integer", "Float"]:
             assert_string += f"(model_output[{index}] >= {item['min_value']} and model_output[{index}] <= {item['max_value']})"
@@ -128,7 +128,7 @@ def generate_success_assert_string(spec) -> str:
         elif item["item_type"] == "Image":
             assert_string += f"(model_output[{index}].size[0] == {item['resolution_x']} and model_output[{index}].size[1] == {item['resolution_y']})"
 
-        if index < len(spec) - 1:
+        if index < len(output_spec) - 1:
             assert_string += "\n\t\t\tand "
         else:
             assert_string += "\n\t\t)\n\n"
@@ -136,7 +136,7 @@ def generate_success_assert_string(spec) -> str:
     return assert_string
 
 
-def generate_failure_assert_string(spec) -> str:
+def generate_failure_assert_string(output_spec) -> str:
     assert_string = ("\t\t# USER INPUT: Define failure case\n"
                     "\t\tassert False\n\n")
 
