@@ -1,6 +1,6 @@
-import math
-
 from string import Template
+
+from model_test.helpers import *
 
 
 equivalence_test_template = Template(
@@ -39,11 +39,22 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
     success_cases = "["
     failure_cases = "[None, "
 
-    special_str = generate_special_string(item["min_length"], item["max_length"])
-    if item["special"]:
-        success_cases += "\"" + special_str + "\", "
+    if item['empty']:
+        success_cases += "\"\", "
     else:
-        failure_cases += "\"" + special_str + "\", "
+        failure_cases += "\"\" ,"
+
+    numeric_str = generate_numeric_string(item["min_length"], item["max_length"])
+    if item["numeric"]:
+        success_cases += "\"" + numeric_str + "\", "
+    else:
+        failure_cases += "\"" + numeric_str + "\", "
+
+    slashes_str = generate_slashes_string(item["min_length"], item["max_length"])
+    if item["slashes"]:
+        success_cases += "\"" + slashes_str + "\""
+    else:
+        failure_cases += "\"" + slashes_str + "\""
 
     spaces_str = generate_spaces_str(item["min_length"], item["max_length"])
     if item["spaces"]:
@@ -51,10 +62,11 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
     else:
         failure_cases += "\"" + spaces_str + "\", "
 
-    if item['empty']:
-        success_cases += "\"\", "
+    special_str = generate_special_string(item["min_length"], item["max_length"])
+    if item["special"]:
+        success_cases += "\"" + special_str + "\", "
     else:
-        failure_cases += "\"\" ,"
+        failure_cases += "\"" + special_str + "\", "
 
     if len(success_cases) > 1:
         success_cases = success_cases[:-2]
@@ -87,24 +99,3 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
             "assert": failure_assert_string
         }
     ))
-
-
-def generate_image_equivalence_tests():
-    pass
-
-
-def generate_special_string(min_length, max_length):
-    str = "@t#$test^&t*"
-    return string_length_adjust(str, min_length, max_length)
-
-
-def generate_spaces_str(min_length, max_length):
-    str = " test test "
-    return string_length_adjust(str, min_length, max_length)
-
-
-def string_length_adjust(str, min_length, max_length):
-    str_length = max_length - int(((max_length - min_length) / 2))
-    str = str * math.ceil((max_length / len(str)))
-    str = str[:str_length]
-    return str

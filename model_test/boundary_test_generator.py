@@ -2,6 +2,8 @@ import string, random
 
 from string import Template
 
+from model_test.helpers import string_length_adjust
+
 
 boundary_test_template = Template(
     "\t@pytest.mark.parametrize(\"boundary_value\", ${boundary_list})\n"
@@ -81,17 +83,18 @@ def generate_float_boundary_tests(test_file, item, item_index, input_string, suc
         }
     ))
 
+
 def generate_string_boundary_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
     test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
     test_file.write("\t# Valid Tests\n")
-    random_str = ''.join(random.choice(string.ascii_letters) for i in range(item['max_length'] + 1))
+    str = string_length_adjust("Test", item["max_length"] + 1, item["max_length"] + 1)
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"\"{random_str[:item['min_length']]}\", "
-                f"\"{random_str[:item['min_length'] + 1]}\", "
-                f"\"{random_str[:item['max_length'] - 1]}\", "
-                f"\"{random_str[:item['max_length']]}\""
+                f"\"{str[:item['min_length']]}\", "
+                f"\"{str[:item['min_length'] + 1]}\", "
+                f"\"{str[:item['max_length'] - 1]}\", "
+                f"\"{str[:item['max_length']]}\""
             "]",
             "item_index": item_index, 
             "test_index": 0,
@@ -105,8 +108,8 @@ def generate_string_boundary_tests(test_file, item, item_index, input_string, su
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"\"{random_str[:item['min_length'] - 1]}\", "
-                f"\"{random_str[:item['max_length'] + 1]}\""
+                f"\"{str[:item['min_length'] - 1]}\", "
+                f"\"{str[:item['max_length'] + 1]}\""
             "]",
             "item_index": item_index, 
             "test_index": 1,
@@ -114,6 +117,7 @@ def generate_string_boundary_tests(test_file, item, item_index, input_string, su
             "assert": failure_assert_string
         }
     ))
+
 
 def generate_image_boundary_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
     test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
