@@ -7,6 +7,8 @@ equivalence_test_template = Template(
     "\t@pytest.mark.parametrize(\"equivalence_value\", ${equivalence_list})\n"
     "\tdef test_equivalence_${item_index}_${test_index}(self, equivalence_value):\n"
     "\t\ttest_input = DataPipelineInput()\n"
+    "\t\tprint(\"This is an equivalence test for ${item}\")\n"
+    "\t\tprint(\"The value being passed is \" + ${value_format} + \" and the test is expected to ${expected_result}\")\n"
     "\t\ttest_input.input${item_index} = equivalence_value\n"
     "\t\tdata_pipeline_output = data_pipeline_instance.run(${input_string})\n"
     "\t\tmodel_output = model_instance.run(data_pipeline_output)\n"
@@ -23,9 +25,12 @@ def generate_integer_equivalence_tests(test_file, item, item_index, input_string
             "equivalence_list": f"["
                 "None"
             "]",
+            "item": item['item_name'],
             "item_index": item_index,
             "test_index": 1,
             "input_string": input_string,
+            "value_format": "str(equivalence_value)",
+            "expected_result": "fail",
             "assert": failure_assert_string
         }
     ))
@@ -81,9 +86,12 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
     test_file.write(equivalence_test_template.substitute(
         {
             "equivalence_list": success_cases,
+            "item": item['item_name'],
             "item_index": item_index,
             "test_index": 0,
             "input_string": input_string,
+            "value_format": "str(equivalence_value)",
+            "expected_result": "pass",
             "assert": success_assert_string
         }
     ))
@@ -93,9 +101,12 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
     test_file.write(equivalence_test_template.substitute(
         {
             "equivalence_list": failure_cases,
+            "item": item['item_name'],
             "item_index": item_index,
             "test_index": 1,
             "input_string": input_string,
+            "value_format": "str(equivalence_value)",
+            "expected_result": "fail",
             "assert": failure_assert_string
         }
     ))

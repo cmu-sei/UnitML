@@ -8,6 +8,8 @@ from model_test.helpers import string_length_adjust
 boundary_test_template = Template(
     "\t@pytest.mark.parametrize(\"boundary_value\", ${boundary_list})\n"
     "\tdef test_boundary_${item_index}_${test_index}(self, boundary_value):\n"
+    "\t\tprint(\"This is a boundary test for ${item}\")\n"
+    "\t\tprint(\"The value being passed is \" + ${value_format} + \" and the test is expected to ${expected_result}\")\n"
     "\t\ttest_input = DataPipelineInput()\n"
     "\t\ttest_input.input${item_index} = boundary_value\n"
     "\t\tdata_pipeline_output = data_pipeline_instance.run(${input_string})\n"
@@ -27,9 +29,12 @@ def generate_integer_boundary_tests(test_file, item, item_index, input_string, s
                 f"{item['max_value'] - 1}, "
                 f"{item['max_value']}"
             "]",
+            "item": item['item_name'],
             "item_index": item_index,
             "test_index": 0,
             "input_string": input_string,
+            "value_format": "str(boundary_value)",
+            "expected_result": "pass",
             "assert": success_assert_string,
         }
     ))
@@ -42,9 +47,12 @@ def generate_integer_boundary_tests(test_file, item, item_index, input_string, s
                 f"{item['min_value'] - 1}, "
                 f"{item['max_value'] + 1}"
             "]",
+            "item": item['item_name'],
             "item_index": item_index,
             "test_index": 1,
             "input_string": input_string,
+            "value_format": "str(boundary_value)",
+            "expected_result": "fail",
             "assert": failure_assert_string
         }
     ))
@@ -61,9 +69,12 @@ def generate_float_boundary_tests(test_file, item, item_index, input_string, suc
                 f"{item['max_value'] - .01:.2f}, "
                 f"{item['max_value']:.2f}"
             "]",
+            "item": item['item_name'],
             "item_index": item_index,
             "test_index": 0,
             "input_string": input_string,
+            "value_format": "str(boundary_value)",
+            "expected_result": "pass",
             "assert": success_assert_string
         }
     ))
@@ -76,9 +87,12 @@ def generate_float_boundary_tests(test_file, item, item_index, input_string, suc
                 f"{item['min_value'] - .01:.2f}, "
                 f"{item['max_value'] + .01:.2f}"
             "]",
+            "item": item['item_name'],
             "item_index": item_index,
             "test_index": 1,
             "input_string": input_string,
+            "value_format": "str(boundary_value)",
+            "expected_result": "fail",
             "assert": failure_assert_string
         }
     ))
@@ -96,9 +110,12 @@ def generate_string_boundary_tests(test_file, item, item_index, input_string, su
                 f"\"{str[:item['max_length'] - 1]}\", "
                 f"\"{str[:item['max_length']]}\""
             "]",
+            "item": item['item_name'],
             "item_index": item_index, 
             "test_index": 0,
             "input_string": input_string,
+            "value_format": "str(boundary_value)",
+            "expected_result": "pass",
             "assert": success_assert_string
         }
     ))
@@ -111,9 +128,12 @@ def generate_string_boundary_tests(test_file, item, item_index, input_string, su
                 f"\"{str[:item['min_length'] - 1]}\", "
                 f"\"{str[:item['max_length'] + 1]}\""
             "]",
+            "item": item['item_name'],
             "item_index": item_index, 
             "test_index": 1,
             "input_string": input_string,
+            "value_format": "str(boundary_value)",
+            "expected_result": "fail",
             "assert": failure_assert_string
         }
     ))
@@ -127,9 +147,12 @@ def generate_image_boundary_tests(test_file, item, item_index, input_string, suc
             "boundary_list": f"["
                 f"Image.new(\"RGB\", size=({item['resolution_x']}, {item['resolution_y']}))"
             "]",
+            "item": item['item_name'],
             "item_index": item_index, 
             "test_index": 0,
             "input_string": input_string,
+            "value_format": "\"an image of resulution \" + str(boundary_value.size)",
+            "expected_result": "pass",
             "assert": success_assert_string
         }
     ))
@@ -142,9 +165,12 @@ def generate_image_boundary_tests(test_file, item, item_index, input_string, suc
                 f"Image.new(\"RGB\", size=({item['resolution_x'] - 1}, {item['resolution_y'] - 1})), "
                 f"Image.new(\"RGB\", size=({item['resolution_x'] + 1}, {item['resolution_y'] + 1}))"
             "]",
+            "item": item['item_name'],
             "item_index": item_index, 
             "test_index": 1,
             "input_string": input_string,
+            "value_format": "\"an image of resulution \" + str(boundary_value.size)",
+            "expected_result": "fail",
             "assert": failure_assert_string
         }
     ))
