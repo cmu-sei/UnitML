@@ -32,8 +32,16 @@ def generate_test_file():
     for item in dp_json["input_spec"]:
         index = dp_json["input_spec"].index(item)
         test_file.write(f"\t\t# Field that relates to the {item['item_name']} item\n")
-        test_file.write(f"\t\t# USER INPUT: Define a default value for this item to be used for tests\n")
-        test_file.write(f"\t\tself.input{index} = None\n\n")
+        test_file.write(f"\t\t# USER INPUT: Define a default vaild value for this item to be used for tests\n")
+        test_file.write(f"\t\t# This value will be passed to the model in tests that are not for this item")
+        if(item["item_type"] == "Integer" or item["item_type"] == "Float"):
+            test_file.write(f"\t\tself.input{index} = {item['min_value']}\n\n")
+        elif(item["item_type"] == "String"):
+            str = string_length_adjust("Test", item["min_length"], item["min_length"])
+            test_file.write(f"\t\tself.input{index} = \"{str}\"\n\n")
+        else:
+            test_file.write(f"\t\tself.input{index} = None \n\n")
+
 
     # Defining the DataPipeline class
     test_file.write("# Defining a class for your data pipeline here\n")
@@ -54,7 +62,10 @@ def generate_test_file():
     test_file.write("\tdef __init__(self):\n")
     test_file.write("\t\tself.model = \n\n")
     test_file.write("\t# USER INPUT: Define how to run your model. The input parameter will be the direct output from DataPipeline.run\n")
-    test_file.write("\t# ex: return self.model.predict(input)\n")
+    test_file.write("\t# Model outputs will be accessed under the assumption that the output is packaged as a tuple, this function must return output in that format.\n")
+    test_file.write("\t# ex:\n")
+    test_file.write("\t# return_value1, return_value2 = self.model.predict(input)\n")
+    test_file.write("\t# return return_value1, return_value2\n")
     test_file.write("\tdef run(self, input):\n")
     test_file.write("\t\treturn input\n\n")
 
@@ -83,7 +94,7 @@ def generate_test_file():
         if index < len(dp_json["input_spec"]) - 1:
             param_list += ", "
     
-    input_string = f"np.array([{param_list}])"
+    input_string = f"{param_list}"
 
     test_file.write("# Boundary tests for each data item defined in the data pipeline input specification\n")
     test_file.write("class TestBoundaries:\n")
