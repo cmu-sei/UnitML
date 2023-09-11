@@ -36,8 +36,24 @@ def generate_integer_equivalence_tests(test_file, item, item_index, input_string
     ))
 
 
-def generate_float_equivalence_tests():
-    pass
+def generate_float_equivalence_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
+    test_file.write(f"\t# Testing the equivalence classes of {item['item_name']}\n")
+    test_file.write("\t# Tests outside classes that are expected to fail\n")
+    test_file.write("\t@pytest.mark.xfail\n")
+    test_file.write(equivalence_test_template.substitute(
+        {
+            "equivalence_list": f"["
+                "None"
+            "]",
+            "item": item['item_name'],
+            "item_index": item_index,
+            "test_index": 1,
+            "input_string": input_string,
+            "value_format": "str(equivalence_value)",
+            "expected_result": "fail",
+            "assert": failure_assert_string
+        }
+    ))
 
 
 def generate_string_equivalence_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
