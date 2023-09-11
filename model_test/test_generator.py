@@ -5,13 +5,26 @@ from model_test.equivalence_test_generator import *
 
 def generate_test_file():
     # Importing the descriptors
-    dp_file = open(glob.glob('* - Data Pipeline.json')[0], "r")
-    dp_json = json.load(dp_file)
-    dp_file.close()
+    try: 
+        dp_file = open(glob.glob('* - Data Pipeline.json')[0], "r")
+        dp_json = json.load(dp_file)
+        dp_file.close()
 
-    tm_file = open(glob.glob('* - Trained Model.json')[0], "r")
-    tm_json = json.load(tm_file)
-    tm_file.close()
+        tm_file = open(glob.glob('* - Trained Model.json')[0], "r")
+        tm_json = json.load(tm_file)
+        tm_file.close()
+    except IndexError as e:
+        test_file = open("test_generated.py", "w")
+        test_file.write("# One or more of the descriptor files could not be found.\n")
+        test_file.write("# Ensure that this directory contains both a Data Pipeline and Trained Model descriptor with the names of the files in the format,\n")
+        test_file.write("# <Project Name> - Data Pipeline.json and <Project Name> - Trained Model.json.")
+        test_file.close()
+        return
+    except Exception as e:
+        test_file = open("test_generated.py", "w")
+        test_file.write(f"# Encountered unexpected error when importing descriptor files: {e}")
+        test_file.close()
+        return
 
     test_file = open("test_generated.py", "w")
 
