@@ -38,6 +38,12 @@ def generate_test_file():
     test_file.write("# USER INPUT: If needed, import your data pipeline and model\n")
     test_file.write("# ex: import my_model_file as model\n\n")
 
+    test_file.write(f"# USER INPUT: If needed, specify the file path for the log file that will be written to\n")
+    test_file.write(f"log_file_path = \"\"\n\n")
+
+    test_file.write(f"def assert_log_file():\n")
+    test_file.write(f"\treturn true\n\n")
+
     # Defining the DataPipelineInput class
     test_file.write("# Defining a class that represents an input into the data pipeline\n")
     test_file.write("class DataPipelineInput:\n")
