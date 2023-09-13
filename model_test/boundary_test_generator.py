@@ -9,7 +9,8 @@ boundary_test_template = Template(
     "\t@pytest.mark.parametrize(\"boundary_value\", ${boundary_list})\n"
     "\tdef test_boundary_${item_index}_${test_index}(self, boundary_value):\n"
     "\t\tprint(\"This is a boundary test for ${item}\")\n"
-    "\t\tprint(\"The value being passed is \" + ${value_format} + \" and the test is expected to ${expected_result}\")\n"
+    "\t\tprint(\"The value being passed is \" + ${value_format} + \" which is ${expected_result} the boundaries\")\n"
+    "${additional_setup}"
     "\t\ttest_input = DataPipelineInput()\n"
     "\t\ttest_input.input${item_index} = boundary_value\n"
     "\t\tdata_pipeline_output = data_pipeline_instance.run(${input_string})\n"
@@ -18,9 +19,9 @@ boundary_test_template = Template(
 )
 
 
-def generate_integer_boundary_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
+def generate_integer_boundary_tests(test_file, item, item_index, input_string, additional_setup_str, success_assert_string, failure_assert_string):
     test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
-    test_file.write("\t# Valid Tests\n")
+    test_file.write(f"\t# Tests inside boundaries\n")
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
@@ -34,13 +35,13 @@ def generate_integer_boundary_tests(test_file, item, item_index, input_string, s
             "test_index": 0,
             "input_string": input_string,
             "value_format": "str(boundary_value)",
-            "expected_result": "pass",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "inside",
             "assert": success_assert_string,
         }
     ))
 
-    test_file.write("\t# Tests outside boundaries that are expected to fail\n")
-    test_file.write("\t@pytest.mark.xfail\n")
+    test_file.write(f"\t# Tests outside boundaries\n")
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
@@ -52,15 +53,16 @@ def generate_integer_boundary_tests(test_file, item, item_index, input_string, s
             "test_index": 1,
             "input_string": input_string,
             "value_format": "str(boundary_value)",
-            "expected_result": "fail",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "outside",
             "assert": failure_assert_string
         }
     ))
 
 
-def generate_float_boundary_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
+def generate_float_boundary_tests(test_file, item, item_index, input_string, additional_setup_str, success_assert_string, failure_assert_string):
     test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
-    test_file.write("\t# Valid Tests\n")
+    test_file.write(f"\t# Test inside boundaries\n")
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
@@ -74,13 +76,13 @@ def generate_float_boundary_tests(test_file, item, item_index, input_string, suc
             "test_index": 0,
             "input_string": input_string,
             "value_format": "str(boundary_value)",
-            "expected_result": "pass",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "inside",
             "assert": success_assert_string
         }
     ))
 
-    test_file.write("\t# Tests outside boundaries that are expected to fail\n")
-    test_file.write("\t@pytest.mark.xfail\n")
+    test_file.write(f"\t# Tests outside boundaries\n")
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
@@ -92,15 +94,16 @@ def generate_float_boundary_tests(test_file, item, item_index, input_string, suc
             "test_index": 1,
             "input_string": input_string,
             "value_format": "str(boundary_value)",
-            "expected_result": "fail",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "outside",
             "assert": failure_assert_string
         }
     ))
 
 
-def generate_string_boundary_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
+def generate_string_boundary_tests(test_file, item, item_index, input_string, additional_setup_str, success_assert_string, failure_assert_string):
     test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
-    test_file.write("\t# Valid Tests\n")
+    test_file.write(f"\t# Tests inside boundaries\n")
     str = string_length_adjust("Test", item["max_length"] + 1, item["max_length"] + 1)
     test_file.write(boundary_test_template.substitute(
         {
@@ -115,13 +118,13 @@ def generate_string_boundary_tests(test_file, item, item_index, input_string, su
             "test_index": 0,
             "input_string": input_string,
             "value_format": "str(boundary_value)",
-            "expected_result": "pass",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "inside",
             "assert": success_assert_string
         }
     ))
 
-    test_file.write("\t# Tests outside boundaries that are expected to fail\n")
-    test_file.write("\t@pytest.mark.xfail\n")
+    test_file.write(f"\t# Tests outside boundaries\n")
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
@@ -133,15 +136,16 @@ def generate_string_boundary_tests(test_file, item, item_index, input_string, su
             "test_index": 1,
             "input_string": input_string,
             "value_format": "str(boundary_value)",
-            "expected_result": "fail",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "outside",
             "assert": failure_assert_string
         }
     ))
 
 
-def generate_image_boundary_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
+def generate_image_boundary_tests(test_file, item, item_index, input_string, additional_setup_str, success_assert_string, failure_assert_string):
     test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
-    test_file.write("\t# Valid Tests\n")
+    test_file.write("\t# Tests inside boundaries\n")
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
@@ -152,13 +156,13 @@ def generate_image_boundary_tests(test_file, item, item_index, input_string, suc
             "test_index": 0,
             "input_string": input_string,
             "value_format": "\"an image of resulution \" + str(boundary_value.size)",
-            "expected_result": "pass",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "inside",
             "assert": success_assert_string
         }
     ))
 
-    test_file.write("\t# Tests outside boundaries that are expected to fail\n")
-    test_file.write("\t@pytest.mark.xfail\n")
+    test_file.write(f"\t# Tests outside boundaries\n")
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
@@ -170,7 +174,8 @@ def generate_image_boundary_tests(test_file, item, item_index, input_string, suc
             "test_index": 1,
             "input_string": input_string,
             "value_format": "\"an image of resulution \" + str(boundary_value.size)",
-            "expected_result": "fail",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "outside",
             "assert": failure_assert_string
         }
     ))

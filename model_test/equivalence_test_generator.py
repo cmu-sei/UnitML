@@ -8,7 +8,8 @@ equivalence_test_template = Template(
     "\tdef test_equivalence_${item_index}_${test_index}(self, equivalence_value):\n"
     "\t\ttest_input = DataPipelineInput()\n"
     "\t\tprint(\"This is an equivalence test for ${item}\")\n"
-    "\t\tprint(\"The value being passed is \" + ${value_format} + \" and the test is expected to ${expected_result}\")\n"
+    "\t\tprint(\"The value being passed is \" + ${value_format} + \" which is ${expected_result} the classes\")\n"
+    "${additional_setup}"
     "\t\ttest_input.input${item_index} = equivalence_value\n"
     "\t\tdata_pipeline_output = data_pipeline_instance.run(${input_string})\n"
     "\t\tmodel_output = model_instance.run(data_pipeline_output)\n"
@@ -16,10 +17,9 @@ equivalence_test_template = Template(
 )
 
 
-def generate_integer_equivalence_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
+def generate_integer_equivalence_tests(test_file, item, item_index, input_string, additional_setup_str, success_assert_string, failure_assert_string):
     test_file.write(f"\t# Testing the equivalence classes of {item['item_name']}\n")
-    test_file.write("\t# Tests outside classes that are expected to fail\n")
-    test_file.write("\t@pytest.mark.xfail\n")
+    test_file.write(f"\t# Tests outside classes\n")
     test_file.write(equivalence_test_template.substitute(
         {
             "equivalence_list": f"["
@@ -30,16 +30,16 @@ def generate_integer_equivalence_tests(test_file, item, item_index, input_string
             "test_index": 1,
             "input_string": input_string,
             "value_format": "str(equivalence_value)",
-            "expected_result": "fail",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "outside",
             "assert": failure_assert_string
         }
     ))
 
 
-def generate_float_equivalence_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
+def generate_float_equivalence_tests(test_file, item, item_index, input_string, additional_setup_str, success_assert_string, failure_assert_string):
     test_file.write(f"\t# Testing the equivalence classes of {item['item_name']}\n")
-    test_file.write("\t# Tests outside classes that are expected to fail\n")
-    test_file.write("\t@pytest.mark.xfail\n")
+    test_file.write(f"\t# Tests outside classes\n")
     test_file.write(equivalence_test_template.substitute(
         {
             "equivalence_list": f"["
@@ -50,13 +50,14 @@ def generate_float_equivalence_tests(test_file, item, item_index, input_string, 
             "test_index": 1,
             "input_string": input_string,
             "value_format": "str(equivalence_value)",
-            "expected_result": "fail",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "outside",
             "assert": failure_assert_string
         }
     ))
 
 
-def generate_string_equivalence_tests(test_file, item, item_index, input_string, success_assert_string, failure_assert_string):
+def generate_string_equivalence_tests(test_file, item, item_index, input_string, additional_setup_str, success_assert_string, failure_assert_string):
     success_cases = "["
     failure_cases = "[None, "
 
@@ -73,9 +74,9 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
 
     slashes_str = generate_slashes_string(item["min_length"], item["max_length"])
     if item["slashes"]:
-        success_cases += "\"" + slashes_str + "\""
+        success_cases += "\"" + slashes_str + "\", "
     else:
-        failure_cases += "\"" + slashes_str + "\""
+        failure_cases += "\"" + slashes_str + "\", "
 
     spaces_str = generate_spaces_str(item["min_length"], item["max_length"])
     if item["spaces"]:
@@ -98,7 +99,7 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
     failure_cases += "]"
 
     test_file.write(f"\t# Testing the equivalence classes of {item['item_name']}\n")
-    test_file.write("\t# Valid tests\n")
+    test_file.write(f"\t# Tests inside classes\n")
     test_file.write(equivalence_test_template.substitute(
         {
             "equivalence_list": success_cases,
@@ -107,13 +108,13 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
             "test_index": 0,
             "input_string": input_string,
             "value_format": "str(equivalence_value)",
-            "expected_result": "pass",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "inside",
             "assert": success_assert_string
         }
     ))
 
-    test_file.write("\t# Tests outside classes that are expected to fail\n")
-    test_file.write("\t@pytest.mark.xfail\n")
+    test_file.write(f"\t# Tests outside classes\n")
     test_file.write(equivalence_test_template.substitute(
         {
             "equivalence_list": failure_cases,
@@ -122,7 +123,8 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
             "test_index": 1,
             "input_string": input_string,
             "value_format": "str(equivalence_value)",
-            "expected_result": "fail",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "outside",
             "assert": failure_assert_string
         }
     ))

@@ -2,6 +2,7 @@ import json, glob
 
 from model_test.boundary_test_generator import *
 from model_test.equivalence_test_generator import *
+from model_test.helpers import string_length_adjust
 
 def generate_test_file():
     # Importing the descriptors
@@ -29,7 +30,6 @@ def generate_test_file():
     test_file = open("test_generated.py", "w")
 
     # Initial setup at the beginning of the file
-    test_file.write("import numpy as np\n")
     test_file.write("import pytest\n\n")
     test_file.write("from PIL import Image\n\n")
     test_file.write("# USER INPUT: Import any modules required for your data pipeline or model\n")
@@ -41,8 +41,12 @@ def generate_test_file():
     test_file.write(f"# USER INPUT: If needed, specify the file path for the log file that will be written to\n")
     test_file.write(f"log_file_path = \"\"\n\n")
 
-    test_file.write(f"def assert_log_file():\n")
-    test_file.write(f"\treturn true\n\n")
+    test_file.write(f"def get_log_file_lines():\n")
+    test_file.write(f"\tlog_file = open(log_file_path, \"r\")\n")
+    test_file.write(f"\tlines_list = log_file.readlines()\n")
+    test_file.write(f"\ttotal_lines = len(lines_list)\n")
+    test_file.write(f"\tlog_file.close()\n")
+    test_file.write(f"\treturn total_lines\n\n")
 
     # Defining the DataPipelineInput class
     test_file.write("# Defining a class that represents an input into the data pipeline\n")
@@ -52,7 +56,7 @@ def generate_test_file():
         index = dp_json["input_spec"].index(item)
         test_file.write(f"\t\t# Field that relates to the {item['item_name']} item\n")
         test_file.write(f"\t\t# USER INPUT: Define a default vaild value for this item to be used for tests\n")
-        test_file.write(f"\t\t# This value will be passed to the model in tests that are not for this item")
+        test_file.write(f"\t\t# This value will be passed to the model in tests that are not for this item\n")
         if(item["item_type"] == "Integer" or item["item_type"] == "Float"):
             test_file.write(f"\t\tself.input{index} = {item['min_value']}\n\n")
         elif(item["item_type"] == "String"):
@@ -96,15 +100,15 @@ def generate_test_file():
 
     # Expected output for assertions based on trained model output/final output spec
     output_spec = {}
-    if tm_json['post_processing']:
-        output_spec = tm_json['final_output_spec']
+    if tm_json["post_processing"]:
+        output_spec = tm_json["final_output_spec"]
     else:
-        output_spec = tm_json['output_spec']
+        output_spec = tm_json["output_spec"]
 
     success_assert_string = generate_success_assert_string(output_spec)
-    failure_assert_string = generate_failure_assert_string(output_spec)
-        
-    # Generate boundary tests
+
+    # Create the string that contains the params for each method
+    # test_input.input0, test_input.input1, ...
     param_list = ""
     for item in dp_json["input_spec"]:
         index = dp_json["input_spec"].index(item)
@@ -115,28 +119,40 @@ def generate_test_file():
     
     input_string = f"{param_list}"
 
+    # Generate boundary tests
     test_file.write("# Boundary tests for each data item defined in the data pipeline input specification\n")
     test_file.write("class TestBoundaries:\n")
     for item in dp_json["input_spec"]:
+        failure_assert_string = generate_failure_assert_string(item["error_handling"])
+        additional_setup_str = ""
+        if item["error_handling"]["error_type"] == "Log to file":
+            additional_setup_str = f"\t\tlines_before_test = get_log_file_lines()\n"
+
         if item["item_type"] == "Integer":
-            generate_integer_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)
+            generate_integer_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)
         elif item["item_type"] == "Float":
-            generate_float_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)
+            generate_float_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)
         elif item["item_type"] == "String":
-            generate_string_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)
+            generate_string_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)
         elif item["item_type"] == "Image":
-            generate_image_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)
+            generate_image_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)
         
 
+    # Generate equivalence tests
     test_file.write("# Equivalence class tests for each data item defined in the data pipeline input specification\n")
     test_file.write("class TestEquivalenceClass:\n")
     for item in dp_json["input_spec"]:
+        failure_assert_string = generate_failure_assert_string(item["error_handling"])
+        additional_setup_str = ""
+        if item["error_handling"]["error_type"] == "Log to file":
+            additional_setup_str = f"\t\tlines_before_test = get_log_file_lines()\n"
+
         if item["item_type"] == "Integer":
-            generate_integer_equivalence_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)
+            generate_integer_equivalence_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)
         elif item["item_type"] == "Float":
-            pass
+            generate_float_equivalence_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)
         elif item["item_type"] == "String":
-            generate_string_equivalence_tests(test_file, item, dp_json["input_spec"].index(item), input_string, success_assert_string, failure_assert_string)            
+            generate_string_equivalence_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)            
         elif item["item_type"] == "Image":
             pass
 
@@ -146,7 +162,7 @@ def generate_test_file():
 
 
 def generate_success_assert_string(output_spec) -> str:
-    assert_string = "\t\tassert (\n\t\t\t"
+    assert_string = f"\t\tassert (\n\t\t\t"
 
     for item in output_spec:
         index = output_spec.index(item)
@@ -157,17 +173,22 @@ def generate_success_assert_string(output_spec) -> str:
             assert_string += f"(len(model_output[{index}]) >= {item['min_length']} and len(model_output[{index}]) <= {item['max_length']})"
         elif item["item_type"] == "Image":
             assert_string += f"(model_output[{index}].size[0] == {item['resolution_x']} and model_output[{index}].size[1] == {item['resolution_y']})"
+        elif item["item_type"] == "None":
+            assert_string += f"(model_output[{index}] == None)"
 
         if index < len(output_spec) - 1:
-            assert_string += "\n\t\t\tand "
+            assert_string += f"\n\t\t\tand "
         else:
-            assert_string += "\n\t\t)\n\n"
+            assert_string += f"\n\t\t)\n\n"
 
     return assert_string
 
-
-def generate_failure_assert_string(output_spec) -> str:
-    assert_string = ("\t\t# USER INPUT: Define failure case\n"
-                    "\t\tassert False\n\n")
-
-    return assert_string
+def generate_failure_assert_string(error_handling) -> str:
+    if(error_handling["error_type"] == "Return none"):
+        return f"\t\tassert model_output == None\n\n"
+    if(error_handling["error_type"] == "Return error code"):
+        return f"\t\tassert model_output == {error_handling['error_code_value']}\n\n"
+    if(error_handling["error_type"] == "Log to console"):
+        return f"\t\tassert False # Error output should have logged to console during model execution. Check test output to confirm.\n\n"
+    if(error_handling["error_type"] == "Log to file"):
+        return f"\t\tassert lines_before_test < get_log_file_lines()\n\n"
