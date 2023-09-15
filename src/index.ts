@@ -16,7 +16,7 @@ function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
   
   const command = 'cmd';
   app.commands.addCommand(command, {
-    label: 'Model Test',
+    label: 'UnitML',
     execute: () => {
       requestAPI<any>('get_example')
         .then(data => {
@@ -24,7 +24,7 @@ function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
         })
         .catch(reason => {
           console.error(
-            `The model_test server extension ran into an error.\n${reason}`
+            `The unitml server extension ran into an error.\n${reason}`
           );
         });
     }
@@ -35,7 +35,7 @@ function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
 
 
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: 'model_test',
+  id: 'unitml',
   autoStart: true,
   requires: [ICommandPalette],
   activate: activate

@@ -1,5 +1,5 @@
 {
   "packageManager": "python",
-  "packageName": "model_test",
-  "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package model_test"
+  "packageName": "unitml",
+  "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package unitml"
 }

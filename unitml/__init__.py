@@ -6,14 +6,14 @@ from .handlers import setup_handlers
 def _jupyter_labextension_paths():
     return [{
         "src": "labextension",
-        "dest": "model_test"
+        "dest": "unitml"
     }]
 
 
 
 def _jupyter_server_extension_points():
     return [{
-        "module": "model_test"
+        "module": "unitml"
     }]
 
 
@@ -26,7 +26,7 @@ def _load_jupyter_server_extension(server_app):
         JupyterLab application instance
     """
     setup_handlers(server_app.web_app)
-    name = "model_test"
+    name = "unitml"
     server_app.log.info(f"Registered {name} server extension")
 
 

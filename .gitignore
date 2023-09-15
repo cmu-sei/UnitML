@@ -7,9 +7,9 @@ node_modules/
 *.egg-info/
 .ipynb_checkpoints
 *.tsbuildinfo
-model_test/labextension
+unitml/labextension
 # Version file is handled by hatchling
-model_test/_version.py
+unitml/_version.py
 
 # Integration tests
 ui-tests/test-results/

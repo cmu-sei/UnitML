@@ -1,8 +1,8 @@
 import json, glob
 
-from model_test.boundary_test_generator import *
-from model_test.equivalence_test_generator import *
-from model_test.helpers import string_length_adjust
+from unitml.boundary_test_generator import *
+from unitml.equivalence_test_generator import *
+from unitml.helpers import string_length_adjust
 
 def generate_test_file():
     # Importing the descriptors

@@ -1,7 +1,7 @@
 {
-  "name": "model_test-ui-tests",
+  "name": "unitml-ui-tests",
   "version": "1.0.0",
-  "description": "JupyterLab model_test Integration Tests",
+  "description": "JupyterLab unitml Integration Tests",
   "private": true,
   "scripts": {
     "start": "jupyter lab --config jupyter_server_test_config.py",

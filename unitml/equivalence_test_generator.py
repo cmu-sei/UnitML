@@ -1,6 +1,6 @@
 from string import Template
 
-from model_test.helpers import *
+from unitml.helpers import *
 
 
 equivalence_test_template = Template(

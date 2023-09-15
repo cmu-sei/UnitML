@@ -1,10 +1,10 @@
-# model_test
+# unitml
 
-[![Github Actions Status](https://github.com/github_username/model_test/workflows/Build/badge.svg)](https://github.com/github_username/model_test/actions/workflows/build.yml)
+[![Github Actions Status](https://github.com/github_username/unitml/workflows/Build/badge.svg)](https://github.com/github_username/unitml/actions/workflows/build.yml)
 A JupyterLab extension.
 
-This extension is composed of a Python package named `model_test`
-for the server extension and a NPM package named `model_test`
+This extension is composed of a Python package named `unitml`
+for the server extension and a NPM package named `unitml`
 for the frontend extension.
 
 ## Requirements
@@ -16,7 +16,7 @@ for the frontend extension.
 To install the extension, execute:
 
 ```bash
-pip install model_test
+pip install unitml
 ```
 
 ## Uninstall
@@ -24,7 +24,7 @@ pip install model_test
 To remove the extension, execute:
 
 ```bash
-pip uninstall model_test
+pip uninstall unitml
 ```
 
 ## Troubleshoot
@@ -55,13 +55,13 @@ The `jlpm` command is JupyterLab's pinned version of
 
 ```bash
 # Clone the repo to your local environment
-# Change directory to the model_test directory
+# Change directory to the unitml directory
 # Install package in development mode
 pip install -e ".[test]"
 # Link your development version of the extension with JupyterLab
 jupyter labextension develop . --overwrite
 # Server extension must be manually installed in develop mode
-jupyter server extension enable model_test
+jupyter server extension enable unitml
 # Rebuild extension Typescript source after making changes
 jlpm build
 ```
@@ -87,13 +87,13 @@ jupyter lab build --minimize=False
 
 ```bash
 # Server extension must be manually disabled in develop mode
-jupyter server extension disable model_test
-pip uninstall model_test
+jupyter server extension disable unitml
+pip uninstall unitml
 ```
 
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
 command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
-folder is located. Then you can remove the symlink named `model_test` within that folder.
+folder is located. Then you can remove the symlink named `unitml` within that folder.
 
 ### Testing the extension
 
@@ -112,7 +112,7 @@ jupyter labextension develop . --overwrite
 To execute them, run:
 
 ```sh
-pytest -vv -r ap --cov model_test
+pytest -vv -r ap --cov unitml
 ```
 
 #### Frontend tests

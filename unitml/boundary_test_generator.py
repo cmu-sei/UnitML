@@ -2,7 +2,7 @@ import string, random
 
 from string import Template
 
-from model_test.helpers import string_length_adjust
+from unitml.helpers import string_length_adjust
 
 
 boundary_test_template = Template(

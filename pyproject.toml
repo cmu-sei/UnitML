@@ -3,7 +3,7 @@ requires = ["hatchling>=1.4.0", "jupyterlab>=3.4.7,<4.0.0", "hatch-nodejs-versio
 build-backend = "hatchling.build"
 
 [project]
-name = "model_test"
+name = "unitml"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.7"
@@ -43,26 +43,26 @@ source = "nodejs"
 fields = ["description", "authors", "urls"]
 
 [tool.hatch.build.targets.sdist]
-artifacts = ["model_test/labextension"]
+artifacts = ["unitml/labextension"]
 exclude = [".github", "binder"]
 
 [tool.hatch.build.targets.wheel.shared-data]
-"model_test/labextension" = "share/jupyter/labextensions/model_test"
-"install.json" = "share/jupyter/labextensions/model_test/install.json"
+"unitml/labextension" = "share/jupyter/labextensions/unitml"
+"install.json" = "share/jupyter/labextensions/unitml/install.json"
 "jupyter-config/server-config" = "etc/jupyter/jupyter_server_config.d"
 "jupyter-config/nb-config" = "etc/jupyter/jupyter_notebook_config.d"
 
 [tool.hatch.build.hooks.version]
-path = "model_test/_version.py"
+path = "unitml/_version.py"
 
 [tool.hatch.build.hooks.jupyter-builder]
 dependencies = ["hatch-jupyter-builder>=0.5"]
 build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = [
-    "model_test/labextension/static/style.js",
-    "model_test/labextension/package.json",
+    "unitml/labextension/static/style.js",
+    "unitml/labextension/package.json",
 ]
-skip-if-exists = ["model_test/labextension/static/style.js"]
+skip-if-exists = ["unitml/labextension/static/style.js"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]
 build_cmd = "build:prod"
@@ -72,7 +72,7 @@ npm = ["jlpm"]
 build_cmd = "install:extension"
 npm = ["jlpm"]
 source_dir = "src"
-build_dir = "model_test/labextension"
+build_dir = "unitml/labextension"
 
 [tool.jupyter-releaser.options]
 version_cmd = "hatch version"
