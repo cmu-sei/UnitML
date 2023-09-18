@@ -11,8 +11,10 @@
 
 # UnitML
 
-[![Github Actions Status](https://github.com/github_username/unitml/workflows/Build/badge.svg)](https://github.com/github_username/unitml/actions/workflows/build.yml)
-A JupyterLab extension.
+[![Github Actions Status](https://github.com/github_username/unitml/workflows/Build/badge.svg)](https://github.com/cmu-sei/unitml/actions/workflows/build.yml)
+A JupyterLab extension used to generate pytest unit tests for a machine learning model.
+The tool relies on the TEC Descriptors, specifically the Data Pipeline and Trained Model descriptors.
+Tests are generated based on the input and output specification contained within these descriptors.
 
 This extension is composed of a Python package named `unitml`
 for the server extension and a NPM package named `unitml`
@@ -24,11 +26,19 @@ for the frontend extension.
 
 ## Install
 
-To install the extension, execute:
+To install the extension, download `.whl` file and execute:
 
 ```bash
-pip install unitml
+conda create -n unitml-env jupyterlab
+conda activate unitml-env
+pip install unitml-0.1.0-py3-none-any.whl
+jupyter lab
 ```
+
+Once installed, the extension will be added to Jupyter Lab and can be
+ran by using the command `UnitML` in the Command Palette. Ensure that
+the directory that you start Jupyter Lab contains the descriptors
+so that the tool can find them and properly generate tests.
 
 ## Uninstall
 
