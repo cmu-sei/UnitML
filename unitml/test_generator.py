@@ -145,7 +145,9 @@ def generate_test_file():
             generate_string_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)
         elif item["item_type"] == "Image":
             generate_image_boundary_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)
-        
+        elif item["item_type"] == "Other":
+            test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
+            test_file.write(f"\t# Cannot generate boundary tests for items of type \"Other\"\n\n")
 
     # Generate equivalence tests
     test_file.write("# Equivalence class tests for each data item defined in the data pipeline input specification\n")
@@ -164,6 +166,9 @@ def generate_test_file():
             generate_string_equivalence_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)            
         elif item["item_type"] == "Image":
             pass
+        elif item["item_type"] == "Other":
+            test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
+            test_file.write(f"\t# Cannot generate equivalence tests for items of type \"Other\"\n\n")
 
     test_file.close()
 
@@ -173,16 +178,16 @@ def generate_test_file():
 def generate_success_assert_string(output_spec) -> str:
     assert_string = f"\t\tassert (\n\t\t\t"
 
-    for item in output_spec:
-        index = output_spec.index(item)
+    for output in output_spec:
+        index = output_spec.index(output)
 
-        if item["item_type"] in ["Integer", "Float"]:
-            assert_string += f"(model_output[{index}] >= {item['min_value']} and model_output[{index}] <= {item['max_value']})"
-        elif item["item_type"] == "String":
-            assert_string += f"(len(model_output[{index}]) >= {item['min_length']} and len(model_output[{index}]) <= {item['max_length']})"
-        elif item["item_type"] == "Image":
-            assert_string += f"(model_output[{index}].size[0] == {item['resolution_x']} and model_output[{index}].size[1] == {item['resolution_y']})"
-        elif item["item_type"] == "None":
+        if output["item_type"] in ["Integer", "Float"]:
+            assert_string += f"(model_output[{index}] >= {output['min_value']} and model_output[{index}] <= {output['max_value']})"
+        elif output["item_type"] == "String":
+            assert_string += f"(len(model_output[{index}]) >= {output['min_length']} and len(model_output[{index}]) <= {output['max_length']})"
+        elif output["item_type"] == "Image":
+            assert_string += f"(model_output[{index}].size[0] == {output['resolution_x']} and model_output[{index}].size[1] == {output['resolution_y']})"
+        elif output["item_type"] == "None":
             assert_string += f"(model_output[{index}] == None)"
 
         if index < len(output_spec) - 1:
@@ -193,11 +198,13 @@ def generate_success_assert_string(output_spec) -> str:
     return assert_string
 
 def generate_failure_assert_string(error_handling) -> str:
-    if(error_handling["error_type"] == "Return none"):
+    if error_handling["error_type"] == "Return none":
         return f"\t\tassert model_output == None\n\n"
-    if(error_handling["error_type"] == "Return error code"):
+    elif error_handling["error_type"] == "Return error code":
         return f"\t\tassert model_output == {error_handling['error_code_value']}\n\n"
-    if(error_handling["error_type"] == "Log to console"):
+    elif error_handling["error_type"] == "Log to console":
         return f"\t\tassert False # Error output should have logged to console during model execution. Check test output to confirm.\n\n"
-    if(error_handling["error_type"] == "Log to file"):
+    elif error_handling["error_type"] == "Log to file":
         return f"\t\tassert lines_before_test < get_log_file_lines()\n\n"
+    elif error_handling["error_type"] == "Other":
+        return f"\t\tassert False # Cannot generate an assert statement for an error output of type \"Other\"\n\n"
