@@ -70,31 +70,31 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
     success_cases = "["
     failure_cases = "[None, "
 
-    if item['empty']:
+    if item['item_specification']['empty']:
         success_cases += "\"\", "
     else:
         failure_cases += "\"\" ,"
 
-    numeric_str = generate_numeric_string(item["min_length"], item["max_length"])
-    if item["numeric"]:
+    numeric_str = generate_numeric_string(item['item_specification']["min_length"], item['item_specification']["max_length"])
+    if item['item_specification']["numeric"]:
         success_cases += "\"" + numeric_str + "\", "
     else:
         failure_cases += "\"" + numeric_str + "\", "
 
-    slashes_str = generate_slashes_string(item["min_length"], item["max_length"])
-    if item["slashes"]:
+    slashes_str = generate_slashes_string(item['item_specification']["min_length"], item['item_specification']["max_length"])
+    if item['item_specification']["slashes"]:
         success_cases += "\"" + slashes_str + "\", "
     else:
         failure_cases += "\"" + slashes_str + "\", "
 
-    spaces_str = generate_spaces_str(item["min_length"], item["max_length"])
-    if item["spaces"]:
+    spaces_str = generate_spaces_str(item['item_specification']["min_length"], item['item_specification']["max_length"])
+    if item['item_specification']["spaces"]:
         success_cases += "\"" + spaces_str + "\", "
     else:
         failure_cases += "\"" + spaces_str + "\", "
 
-    special_str = generate_special_string(item["min_length"], item["max_length"])
-    if item["special"]:
+    special_str = generate_special_string(item['item_specification']["min_length"], item['item_specification']["max_length"])
+    if item['item_specification']["special"]:
         success_cases += "\"" + special_str + "\", "
     else:
         failure_cases += "\"" + special_str + "\", "

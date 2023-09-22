@@ -34,10 +34,10 @@ def generate_integer_boundary_tests(test_file, item, item_index, input_string, a
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"{item['min_value']}, "
-                f"{item['min_value'] + 1}, "
-                f"{item['max_value'] - 1}, "
-                f"{item['max_value']}"
+                f"{item['item_specification']['min_value']}, "
+                f"{item['item_specification']['min_value'] + 1}, "
+                f"{item['item_specification']['max_value'] - 1}, "
+                f"{item['item_specification']['max_value']}"
             "]",
             "item": item['item_name'],
             "item_index": item_index,
@@ -54,8 +54,8 @@ def generate_integer_boundary_tests(test_file, item, item_index, input_string, a
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"{item['min_value'] - 1}, "
-                f"{item['max_value'] + 1}"
+                f"{item['item_specification']['min_value'] - 1}, "
+                f"{item['item_specification']['max_value'] + 1}"
             "]",
             "item": item['item_name'],
             "item_index": item_index,
@@ -75,10 +75,10 @@ def generate_float_boundary_tests(test_file, item, item_index, input_string, add
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"{item['min_value']:.2f}, "
-                f"{item['min_value'] + .01:.2f}, "
-                f"{item['max_value'] - .01:.2f}, "
-                f"{item['max_value']:.2f}"
+                f"{item['item_specification']['min_value']:.2f}, "
+                f"{item['item_specification']['min_value'] + .01:.2f}, "
+                f"{item['item_specification']['max_value'] - .01:.2f}, "
+                f"{item['item_specification']['max_value']:.2f}"
             "]",
             "item": item['item_name'],
             "item_index": item_index,
@@ -95,8 +95,8 @@ def generate_float_boundary_tests(test_file, item, item_index, input_string, add
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"{item['min_value'] - .01:.2f}, "
-                f"{item['max_value'] + .01:.2f}"
+                f"{item['item_specification']['min_value'] - .01:.2f}, "
+                f"{item['item_specification']['max_value'] + .01:.2f}"
             "]",
             "item": item['item_name'],
             "item_index": item_index,
@@ -113,14 +113,14 @@ def generate_float_boundary_tests(test_file, item, item_index, input_string, add
 def generate_string_boundary_tests(test_file, item, item_index, input_string, additional_setup_str, success_assert_string, failure_assert_string):
     test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
     test_file.write(f"\t# Tests inside boundaries\n")
-    str = string_length_adjust("Test", item["max_length"] + 1, item["max_length"] + 1)
+    str = string_length_adjust("Test", item['item_specification']["max_length"] + 1, item['item_specification']["max_length"] + 1)
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"\"{str[:item['min_length']]}\", "
-                f"\"{str[:item['min_length'] + 1]}\", "
-                f"\"{str[:item['max_length'] - 1]}\", "
-                f"\"{str[:item['max_length']]}\""
+                f"\"{str[:item['item_specification']['min_length']]}\", "
+                f"\"{str[:item['item_specification']['min_length'] + 1]}\", "
+                f"\"{str[:item['item_specification']['max_length'] - 1]}\", "
+                f"\"{str[:item['item_specification']['max_length']]}\""
             "]",
             "item": item['item_name'],
             "item_index": item_index, 
@@ -137,8 +137,8 @@ def generate_string_boundary_tests(test_file, item, item_index, input_string, ad
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"\"{str[:item['min_length'] - 1]}\", "
-                f"\"{str[:item['max_length'] + 1]}\""
+                f"\"{str[:item['item_specification']['min_length'] - 1]}\", "
+                f"\"{str[:item['item_specification']['max_length'] + 1]}\""
             "]",
             "item": item['item_name'],
             "item_index": item_index, 
@@ -158,7 +158,7 @@ def generate_image_boundary_tests(test_file, item, item_index, input_string, add
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"Image.new(\"RGB\", size=({item['resolution_x']}, {item['resolution_y']}))"
+                f"Image.new(\"RGB\", size=({item['item_specification']['resolution_x']}, {item['item_specification']['resolution_y']}))"
             "]",
             "item": item['item_name'],
             "item_index": item_index, 
@@ -175,8 +175,8 @@ def generate_image_boundary_tests(test_file, item, item_index, input_string, add
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"Image.new(\"RGB\", size=({item['resolution_x'] - 1}, {item['resolution_y'] - 1})), "
-                f"Image.new(\"RGB\", size=({item['resolution_x'] + 1}, {item['resolution_y'] + 1}))"
+                f"Image.new(\"RGB\", size=({item['item_specification']['resolution_x'] - 1}, {item['item_specification']['resolution_y'] - 1})), "
+                f"Image.new(\"RGB\", size=({item['item_specification']['resolution_x'] + 1}, {item['item_specification']['resolution_y'] + 1}))"
             "]",
             "item": item['item_name'],
             "item_index": item_index, 

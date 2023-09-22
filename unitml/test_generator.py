@@ -67,9 +67,9 @@ def generate_test_file():
         test_file.write(f"\t\t# USER INPUT: Define a default vaild value for this item to be used for tests\n")
         test_file.write(f"\t\t# This value will be passed to the model in tests that are not for this item\n")
         if(item["item_type"] == "Integer" or item["item_type"] == "Float"):
-            test_file.write(f"\t\tself.input{index} = {item['min_value']}\n\n")
+            test_file.write(f"\t\tself.input{index} = {item['item_specification']['min_value']}\n\n")
         elif(item["item_type"] == "String"):
-            str = string_length_adjust("Test", item["min_length"], item["min_length"])
+            str = string_length_adjust("Test", item['item_specification']["min_length"], item['item_specification']["min_length"])
             test_file.write(f"\t\tself.input{index} = \"{str}\"\n\n")
         else:
             test_file.write(f"\t\tself.input{index} = None \n\n")
@@ -182,11 +182,11 @@ def generate_success_assert_string(output_spec) -> str:
         index = output_spec.index(output)
 
         if output["item_type"] in ["Integer", "Float"]:
-            assert_string += f"(model_output[{index}] >= {output['min_value']} and model_output[{index}] <= {output['max_value']})"
+            assert_string += f"(model_output[{index}] >= {output['item_specification']['min_value']} and model_output[{index}] <= {output['item_specification']['max_value']})"
         elif output["item_type"] == "String":
-            assert_string += f"(len(model_output[{index}]) >= {output['min_length']} and len(model_output[{index}]) <= {output['max_length']})"
+            assert_string += f"(len(model_output[{index}]) >= {output['item_specification']['min_length']} and len(model_output[{index}]) <= {output['item_specification']['max_length']})"
         elif output["item_type"] == "Image":
-            assert_string += f"(model_output[{index}].size[0] == {output['resolution_x']} and model_output[{index}].size[1] == {output['resolution_y']})"
+            assert_string += f"(model_output[{index}].size[0] == {output['item_specification']['resolution_x']} and model_output[{index}].size[1] == {output['item_specification']['resolution_y']})"
         elif output["item_type"] == "None":
             assert_string += f"(model_output[{index}] == None)"
 

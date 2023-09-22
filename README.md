@@ -11,7 +11,6 @@
 
 # UnitML
 
-[![Github Actions Status](https://github.com/github_username/unitml/workflows/Build/badge.svg)](https://github.com/cmu-sei/unitml/actions/workflows/build.yml)
 A JupyterLab extension used to generate pytest unit tests for a machine learning model.
 The tool relies on the TEC Descriptors, specifically the Data Pipeline and Trained Model descriptors.
 Tests are generated based on the input and output specification contained within these descriptors.
