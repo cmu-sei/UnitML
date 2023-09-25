@@ -148,6 +148,9 @@ def generate_test_file():
         elif item["item_type"] == "Other":
             test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
             test_file.write(f"\t# Cannot generate boundary tests for items of type \"Other\"\n\n")
+        else:
+            test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
+            test_file.write(f"\t# Cannot generate boundary tests for items without a type specified in descriptor.\n\n")
 
     # Generate equivalence tests
     test_file.write("# Equivalence class tests for each data item defined in the data pipeline input specification\n")
@@ -167,8 +170,11 @@ def generate_test_file():
         elif item["item_type"] == "Image":
             pass
         elif item["item_type"] == "Other":
-            test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
+            test_file.write(f"\t# Testing the equivalence classes of {item['item_name']}\n")
             test_file.write(f"\t# Cannot generate equivalence tests for items of type \"Other\"\n\n")
+        else:
+            test_file.write(f"\t# Testing the equivalence classes of {item['item_name']}\n")
+            test_file.write(f"\t# Cannot generate boundary tests for items without a type specified in descriptor.\n\n")
 
     test_file.close()
 
@@ -189,6 +195,8 @@ def generate_success_assert_string(output_spec) -> str:
             assert_string += f"(model_output[{index}].size[0] == {output['item_specification']['resolution_x']} and model_output[{index}].size[1] == {output['item_specification']['resolution_y']})"
         elif output["item_type"] == "None":
             assert_string += f"(model_output[{index}] == None)"
+        else:
+            assert_string += f"False # No item type specified in descriptor"
 
         if index < len(output_spec) - 1:
             assert_string += f"\n\t\t\tand "
@@ -208,3 +216,5 @@ def generate_failure_assert_string(error_handling) -> str:
         return f"\t\tassert lines_before_test < get_log_file_lines()\n\n"
     elif error_handling["error_type"] == "Other":
         return f"\t\tassert False # Cannot generate an assert statement for an error output of type \"Other\"\n\n"
+    else:
+        return f"\t\t # assert False # No error type specified in descriptor.\n\n"

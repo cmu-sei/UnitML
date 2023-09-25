@@ -7,8 +7,6 @@
 # DM23-0976
 
 
-import string, random
-
 from string import Template
 
 from unitml.helpers import string_length_adjust
