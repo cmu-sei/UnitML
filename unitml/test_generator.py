@@ -51,9 +51,10 @@ def generate_test_file():
     test_file.write(f"# ex: import my_model_file as model\n\n")
 
     test_file.write(f"# USER INPUT: If needed, specify the file path for the log file that will be written to during failure cases\n")
+    test_file.write(f"ex: image_folder_path = logs_folder/log.txt\n")
     test_file.write(f"log_file_path = \"\"\n\n")
 
-    test_file.write(f"# USER INPUT: # USER INPUT: If needed, specify the folder path that output images will be written to\n")
+    test_file.write(f"# USER INPUT: If needed, specify the folder path that output images will be written to\n")
     test_file.write(f"# ex: image_folder_path = \"images/\"\n")
     test_file.write(f"image_folder_path = \"\"\n\n")
 

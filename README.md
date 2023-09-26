@@ -12,7 +12,7 @@
 # UnitML
 
 A JupyterLab extension used to generate pytest unit tests for a machine learning model.
-The tool relies on the TEC Descriptors, specifically the Data Pipeline and Trained Model descriptors.
+The tool relies on the v1.2 TEC Descriptors, specifically the Data Pipeline and Trained Model descriptors.
 Tests are generated based on the input and output specification contained within these descriptors.
 
 This extension is composed of a Python package named `unitml`
@@ -22,6 +22,8 @@ for the frontend extension.
 ## Requirements
 
 - JupyterLab >= 3.0
+- pytest >= 7.4.2
+- Pillow >= 10.0.1
 
 ## Install
 
@@ -34,10 +36,35 @@ pip install unitml-0.1.0-py3-none-any.whl
 jupyter lab
 ```
 
+## Usage
+
 Once installed, the extension will be added to Jupyter Lab and can be
-ran by using the command `UnitML` in the Command Palette. Ensure that
-the directory that you start Jupyter Lab contains the descriptors
-so that the tool can find them and properly generate tests.
+ran by using the command `UnitML` in the Command Palette. The descriptors
+must be located in the directory that Jupyter Lab is started in, or the 
+extension will be unable to find them.
+
+Once the tool has been ran, it will generate the file `test_generated.py` in
+the directory with the descriptors. This file contains a framework for unit
+testing the model specified.
+
+While most of the file is ready to go, there are a couple sections that require
+input from the user in order to work. These sections are marked with comments
+starting with `# USER INPUT` and give an explanation of what needs to be added.
+
+Once these sections have been updated, the tests are ready to be ran. Ensure that
+the data pipeline and model files are available to be imported by the test file and run the tests.
+Pytest can be run with the command, which will run all the tests contained in the file.
+
+```bash
+pytest
+```
+
+If desired, this can also be done within a jupyter notebook to preserve the output:
+
+```python
+import subprocess
+subprocess.run["pytest"]
+```
 
 ## Uninstall
 
