@@ -25,9 +25,9 @@ def generate_test_file():
         tm_file.close()
     except IndexError as e:
         test_file = open("test_generated.py", "w")
-        test_file.write("# One or more of the descriptor files could not be found.\n")
-        test_file.write("# Ensure that this directory contains both a Data Pipeline and Trained Model descriptor with the names of the files in the format,\n")
-        test_file.write("# <Project Name> - Data Pipeline.json and <Project Name> - Trained Model.json.")
+        test_file.write(f"# One or more of the descriptor files could not be found.\n")
+        test_file.write(f"# Ensure that this directory contains both a Data Pipeline and Trained Model descriptor with the names of the files in the format,\n")
+        test_file.write(f"# <Project Name> - Data Pipeline.json and <Project Name> - Trained Model.json.")
         test_file.close()
         return
     except Exception as e:
@@ -39,16 +39,23 @@ def generate_test_file():
     test_file = open("test_generated.py", "w")
 
     # Initial setup at the beginning of the file
-    test_file.write("import pytest\n\n")
-    test_file.write("from PIL import Image\n\n")
-    test_file.write("# USER INPUT: Import any modules required for your data pipeline or model\n")
-    test_file.write("# ex: import tensorflow as tf\n\n")
+    test_file.write(f"import pytest\n\n")
+    test_file.write(f"from PIL import Image\n")
+    test_file.write(f"import glob\n")
+    test_file.write(f"import os.path\n\n")
 
-    test_file.write("# USER INPUT: If needed, import your data pipeline and model\n")
-    test_file.write("# ex: import my_model_file as model\n\n")
+    test_file.write(f"# USER INPUT: Import any modules required for your data pipeline or model\n")
+    test_file.write(f"# ex: import tensorflow as tf\n\n")
 
-    test_file.write(f"# USER INPUT: If needed, specify the file path for the log file that will be written to\n")
+    test_file.write(f"# USER INPUT: If needed, import your data pipeline and model\n")
+    test_file.write(f"# ex: import my_model_file as model\n\n")
+
+    test_file.write(f"# USER INPUT: If needed, specify the file path for the log file that will be written to during failure cases\n")
     test_file.write(f"log_file_path = \"\"\n\n")
+
+    test_file.write(f"# USER INPUT: # USER INPUT: If needed, specify the folder path that output images will be written to\n")
+    test_file.write(f"# ex: image_folder_path = \"images/\"\n")
+    test_file.write(f"image_folder_path = \"\"\n\n")
 
     test_file.write(f"def get_log_file_lines():\n")
     test_file.write(f"\tlog_file = open(log_file_path, \"r\")\n")
@@ -56,6 +63,13 @@ def generate_test_file():
     test_file.write(f"\ttotal_lines = len(lines_list)\n")
     test_file.write(f"\tlog_file.close()\n")
     test_file.write(f"\treturn total_lines\n\n")
+
+    test_file.write(f"def get_last_edited_image():\n")
+    test_file.write(f"\tfile_list = glob.glob(image_folder_path + \"*\")\n")
+    test_file.write(f"\tlast_edited_image_path = max(file_list, key=os.path.getctime)\n")
+    test_file.write(f"\timage = Image.open(last_edited_image_path)\n")
+    test_file.write(f"\tformat = last_edited_image_path[-3:]\n")
+    test_file.write(f"\treturn image, format\n\n")
 
     # Defining the DataPipelineInput class
     test_file.write("# Defining a class that represents an input into the data pipeline\n")
@@ -182,7 +196,11 @@ def generate_test_file():
 
 
 def generate_success_assert_string(output_spec) -> str:
-    assert_string = f"\t\tassert (\n\t\t\t"
+    assert_string = ""
+    if any(output["item_type"] == "Image" for output in output_spec):
+        assert_string += f"\t\toutput_image = get_last_edited_image()\n"
+
+    assert_string += f"\t\tassert (\n\t\t\t"
 
     for output in output_spec:
         index = output_spec.index(output)
@@ -192,9 +210,9 @@ def generate_success_assert_string(output_spec) -> str:
         elif output["item_type"] == "String":
             assert_string += f"(len(model_output[{index}]) >= {output['item_specification']['min_length']} and len(model_output[{index}]) <= {output['item_specification']['max_length']})"
         elif output["item_type"] == "Image":
-            assert_string += f"(model_output[{index}].size[0] == {output['item_specification']['resolution_x']} and model_output[{index}].size[1] == {output['item_specification']['resolution_y']})"
-        elif output["item_type"] == "None":
-            assert_string += f"(model_output[{index}] == None)"
+            assert_string += f"(output_image[0].size == ({output['item_specification']['resolution_x']}, {output['item_specification']['resolution_y']}) and output_image[1] == \"{output['item_specification']['image_format'].lower()}\")"
+        elif output["item_type"] == "Other":
+            assert_string += f"(True) # Cannot generate an assert check for an error output of type \"Other\""
         else:
             assert_string += f"False # No item type specified in descriptor"
 
@@ -204,6 +222,7 @@ def generate_success_assert_string(output_spec) -> str:
             assert_string += f"\n\t\t)\n\n"
 
     return assert_string
+
 
 def generate_failure_assert_string(error_handling) -> str:
     if error_handling["error_type"] == "Return none":

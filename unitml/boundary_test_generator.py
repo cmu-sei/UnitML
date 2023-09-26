@@ -153,10 +153,17 @@ def generate_string_boundary_tests(test_file, item, item_index, input_string, ad
 def generate_image_boundary_tests(test_file, item, item_index, input_string, additional_setup_str, success_assert_string, failure_assert_string):
     test_file.write(f"\t# Testing the boundaries of {item['item_name']}\n")
     test_file.write("\t# Tests inside boundaries\n")
+
+    image_mode = ""
+    if item["item_specification"]["channels"] == 1:
+        image_mode = "L"
+    elif item["item_specification"]["channels"] == 3:
+        image_mode = "RGB"
+
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"Image.new(\"RGB\", size=({item['item_specification']['resolution_x']}, {item['item_specification']['resolution_y']}))"
+                f"Image.new(\"{image_mode}\", size=({item['item_specification']['resolution_x']}, {item['item_specification']['resolution_y']}))"
             "]",
             "item": item['item_name'],
             "item_index": item_index, 
@@ -173,8 +180,8 @@ def generate_image_boundary_tests(test_file, item, item_index, input_string, add
     test_file.write(boundary_test_template.substitute(
         {
             "boundary_list": f"["
-                f"Image.new(\"RGB\", size=({item['item_specification']['resolution_x'] - 1}, {item['item_specification']['resolution_y'] - 1})), "
-                f"Image.new(\"RGB\", size=({item['item_specification']['resolution_x'] + 1}, {item['item_specification']['resolution_y'] + 1}))"
+                f"Image.new(\"{image_mode}\", size=({item['item_specification']['resolution_x'] - 1}, {item['item_specification']['resolution_y'] - 1})), "
+                f"Image.new(\"{image_mode}\", size=({item['item_specification']['resolution_x'] + 1}, {item['item_specification']['resolution_y'] + 1}))"
             "]",
             "item": item['item_name'],
             "item_index": item_index, 
