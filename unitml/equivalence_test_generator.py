@@ -137,3 +137,45 @@ def generate_string_equivalence_tests(test_file, item, item_index, input_string,
             "assert": failure_assert_string
         }
     ))
+
+
+def generate_image_equivalence_tests(test_file, item, item_index, input_string, additional_setup_str, success_assert_string, failure_assert_string):
+    test_file.write(f"\t# Testing the equivalence classes of {item['item_name']}\n")
+    test_file.write("\t# Tests inside classes\n")
+
+    channels = item["item_specification"]["channels"]
+    correct_mode = "L" if channels == 1 else "RGB"
+    incorrect_mode = "RGB" if channels == 1 else "L"
+
+    test_file.write(equivalence_test_template.substitute(
+        {
+            "equivalence_list": f"["
+                f"Image.new(\"{correct_mode}\", size=({item['item_specification']['resolution_x']}, {item['item_specification']['resolution_y']}))"
+            "]",
+            "item": item['item_name'],
+            "item_index": item_index, 
+            "test_index": 0,
+            "input_string": input_string,
+            "value_format": f"\"an image with correct number of channels\"",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "inside",
+            "assert": success_assert_string
+        }
+    ))
+
+    test_file.write(f"\t# Tests outside classes\n")
+    test_file.write(equivalence_test_template.substitute(
+        {
+            "equivalence_list": f"["
+                f"Image.new(\"{incorrect_mode}\", size=({item['item_specification']['resolution_x']}, {item['item_specification']['resolution_y']})), "
+            "]",
+            "item": item['item_name'],
+            "item_index": item_index, 
+            "test_index": 1,
+            "input_string": input_string,
+            "value_format": f"\"an image incorrect number of channels\"",
+            "additional_setup" : additional_setup_str,
+            "expected_result": "outside",
+            "assert": failure_assert_string
+        }
+    ))

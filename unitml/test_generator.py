@@ -72,7 +72,11 @@ def generate_test_file():
     test_file.write(f"\treturn image, format\n\n")
 
     # Defining the DataPipelineInput class
-    test_file.write("# Defining a class that represents an input into the data pipeline\n")
+    test_file.write(f"# Defining a class that represents an input into the data pipeline\n")
+    test_file.write(f"# NOTE: Input parameters are passed to the data pipeline in the order they\n")
+    test_file.write(f"# are saved in the descriptor. If this does not match the order that the Data Pipeline\n")
+    test_file.write(f"# is expecting the parameters, edit the order in the descriptor JSON and regenerate this file.")
+    test_file.write(f"# ex: data_pipeline_instance.run(test_input.input0, test_input.input1, test_input.input2)")
     test_file.write("class DataPipelineInput:\n")
     test_file.write(f"\tdef __init__(self):\n")
     for item in dp_json["input_spec"]:
@@ -182,7 +186,7 @@ def generate_test_file():
         elif item["item_type"] == "String":
             generate_string_equivalence_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)            
         elif item["item_type"] == "Image":
-            pass
+            generate_image_equivalence_tests(test_file, item, dp_json["input_spec"].index(item), input_string, additional_setup_str, success_assert_string, failure_assert_string)            
         elif item["item_type"] == "Other":
             test_file.write(f"\t# Testing the equivalence classes of {item['item_name']}\n")
             test_file.write(f"\t# Cannot generate equivalence tests for items of type \"Other\"\n\n")
