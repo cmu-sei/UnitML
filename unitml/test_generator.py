@@ -51,7 +51,7 @@ def generate_test_file():
     test_file.write(f"# ex: import my_model_file as model\n\n")
 
     test_file.write(f"# USER INPUT: If needed, specify the file path for the log file that will be written to during failure cases\n")
-    test_file.write(f"ex: image_folder_path = logs_folder/log.txt\n")
+    test_file.write(f"# ex: image_folder_path = logs_folder/log.txt\n")
     test_file.write(f"log_file_path = \"\"\n\n")
 
     test_file.write(f"# USER INPUT: If needed, specify the folder path that output images will be written to\n")
@@ -76,8 +76,8 @@ def generate_test_file():
     test_file.write(f"# Defining a class that represents an input into the data pipeline\n")
     test_file.write(f"# NOTE: Input parameters are passed to the data pipeline in the order they\n")
     test_file.write(f"# are saved in the descriptor. If this does not match the order that the Data Pipeline\n")
-    test_file.write(f"# is expecting the parameters, edit the order in the descriptor JSON and regenerate this file.")
-    test_file.write(f"# ex: data_pipeline_instance.run(test_input.input0, test_input.input1, test_input.input2)")
+    test_file.write(f"# is expecting the parameters, edit the order in the descriptor JSON and regenerate this file.\n")
+    test_file.write(f"# ex: data_pipeline_instance.run(test_input.input0, test_input.input1, test_input.input2)\n")
     test_file.write("class DataPipelineInput:\n")
     test_file.write(f"\tdef __init__(self):\n")
     for item in dp_json["input_spec"]:

@@ -20,7 +20,7 @@ equivalence_test_template = Template(
     "\t\tprint(\"The value being passed is \" + ${value_format} + \" which is ${expected_result} the classes\")\n"
     "${additional_setup}"
     "\t\ttest_input.input${item_index} = equivalence_value\n"
-    "\t\tdata_pipeline_output = data_pipeline_instance.run(${input_string})\n"
+    "\t\tdata_pipeline_output = data_pipeline_instance.run(test_input)\n"
     "\t\tmodel_output = model_instance.run(data_pipeline_output)\n"
     "${assert}"
 )

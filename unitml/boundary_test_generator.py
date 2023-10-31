@@ -20,7 +20,7 @@ boundary_test_template = Template(
     "${additional_setup}"
     "\t\ttest_input = DataPipelineInput()\n"
     "\t\ttest_input.input${item_index} = boundary_value\n"
-    "\t\tdata_pipeline_output = data_pipeline_instance.run(${input_string})\n"
+    "\t\tdata_pipeline_output = data_pipeline_instance.run(test_input)\n"
     "\t\tmodel_output = model_instance.run(data_pipeline_output)\n"
     "${assert}"
 )
